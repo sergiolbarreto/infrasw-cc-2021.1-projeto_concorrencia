@@ -12,7 +12,7 @@ public class Player {
 
         };
         ActionListener buttonListernerAddSongOk = e -> {
-            
+
         };
         ActionListener buttonListenerPause = e -> {
 
