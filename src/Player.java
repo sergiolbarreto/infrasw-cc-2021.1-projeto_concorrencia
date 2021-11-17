@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.Objects;
 
 import ui.PlayerWindow;
 
@@ -17,7 +18,8 @@ public class Player {
     public Player() {
 
         // ActionListener que vai ativar funçao de adicionar uma musica
-        ActionListener adicionarMusica = e -> adicionarMusica();
+        ActionListener AdicionarMusica = e -> adicionarMusica();
+        ActionListener RemoverMusica = e -> removerMusica();
 
         ActionListener buttonListenerPause = e -> {
 
@@ -64,8 +66,8 @@ public class Player {
         };
         this.window = new PlayerWindow(
                 null,
-                null,
-                adicionarMusica,
+                RemoverMusica,
+                AdicionarMusica,
                 null,
                 null,
                 null,
@@ -104,6 +106,17 @@ public class Player {
         newWindow.start();
         this.musicaAtualId++;
         newWindow.start();
+    }
+
+    void removerMusica() {
+        int id = this.window.getSelectedSongID();
+        String[][] listaDeFilas = new String[queueArray.length - 1][7];
+        for (int i = 0; i < queueArray.length; i++) {
+            String[] musica = queueArray[i];
+            if (!Objects.equals(musica[6], Integer.toString(id))) {listaDeFilas[i] = musica;}
+        }
+        this.queueArray = listaDeFilas;
+        this.window.updateQueueList(listaDeFilas);
     }
 }
 
