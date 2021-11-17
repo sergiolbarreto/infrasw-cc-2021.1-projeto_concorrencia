@@ -6,6 +6,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
+import ui.PlayerWindow;
+
 public class Player {
     PlayerWindow window;
     AddSongWindow addSongWindow;
@@ -60,6 +62,7 @@ public class Player {
             public void mouseMoved(MouseEvent e) {}
         };
         window = new PlayerWindow(buttonListenerPlayNow, buttonListenerRemove, buttonListenerAddSong, buttonListenerPause, null, null, null, null, null, scrubberListenerClick, scrubberListenerMotion, "Player", arrQueue);
+        new PlayerWindow(null, null, null, null, null, null, null, null, null, null, null, "Player", null);
     }
 }
 
