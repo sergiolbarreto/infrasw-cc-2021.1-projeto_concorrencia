@@ -18,7 +18,6 @@ public class ThreadDoScroller extends Thread{
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    window.updateMiniplayer(true, false, false, i, tamanho, 0, 0);
                     return;
                 }
             }

@@ -163,16 +163,16 @@ public class Player {
         ThreadDoScroller = new ThreadDoScroller(window, window.getScrubberValue(), tamMus);
     }
 
-    void pausarTocarMusica() {
+    void pausarTocarMusica()  {
         if (!condicaoMusica) {
             ThreadDoScroller.start();
             window.updatePlayPauseButton(true);
             condicaoMusica = true;
-        } else {
-            window.updatePlayPauseButton(false);
-            condicaoMusica = false;
+        }
+        else {
+                window.updatePlayPauseButton(false);
+                condicaoMusica = false;
         }
     }
-    
 }
 
