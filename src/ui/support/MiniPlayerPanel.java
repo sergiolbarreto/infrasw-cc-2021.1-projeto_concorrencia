@@ -8,6 +8,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.Objects;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class MiniPlayerPanel extends JPanel {
 
@@ -141,8 +144,18 @@ public class MiniPlayerPanel extends JPanel {
 
     // TODO Sincronizar
     public void updatePlayPauseButton(boolean isPlaying) {
-        miniPlayerPlayPauseButton.setIcon(isPlaying ? iconPause : iconPlay);
+        final ReentrantLock lockPlayPause = new ReentrantLock();
+        lockPlayPause.lock();
+        try
+        {
+            miniPlayerPlayPauseButton.setIcon(isPlaying ? iconPause : iconPlay);
+        }
+        finally {
+            lockPlayPause.unlock();
+        }
+
     }
+
 
     // TODO Sincronizar
     public void updateMiniplayer(
@@ -173,13 +186,21 @@ public class MiniPlayerPanel extends JPanel {
 
     // TODO Sincronizar
     public void resetMiniPlayer() {
-        miniPlayerCurrentTime.setText("- - : - -");
-        miniPlayerTotalTime.setText("- - : - -");
-        miniPlayerSongInfo.setText("");
-        miniPlayerScrubber.setMaximum(0);
-        miniPlayerScrubber.setEnabled(false);
-        miniPlayerPlayPauseButton.setIcon(iconPlay);
-        disableScrubberArea();
+        final ReentrantLock lockResetMiniPlayer = new ReentrantLock();
+        lockResetMiniPlayer.lock();
+        try
+        {
+            miniPlayerCurrentTime.setText("- - : - -");
+            miniPlayerTotalTime.setText("- - : - -");
+            miniPlayerSongInfo.setText("");
+            miniPlayerScrubber.setMaximum(0);
+            miniPlayerScrubber.setEnabled(false);
+            miniPlayerPlayPauseButton.setIcon(iconPlay);
+            disableScrubberArea();
+        }
+        finally {
+            lockResetMiniPlayer.unlock();
+        }
     }
 
     public int getScrubberValue() {
