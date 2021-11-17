@@ -19,7 +19,14 @@ public class Player {
 
         // ActionListener que vai ativar funçao de adicionar uma musica
         ActionListener AdicionarMusica = e -> adicionarMusica();
+        // ActionListener que vai ativar funçao de remover uma musica
         ActionListener RemoverMusica = e -> removerMusica();
+        // ActionListener que vai ativar funçao de tocar uma musica
+        ActionListener TocarMusica = e -> tocarMusica();
+        // ActionListener que vai ativar funçao de começar e parar uma musica
+        ActionListener PausarTocarMusica = e -> pausarTocarMusica();
+        // ActionListener que vai parar uma musica
+        ActionListener PararMusica = e -> pararMusica();
 
         ActionListener buttonListenerPause = e -> {
 
@@ -65,11 +72,11 @@ public class Player {
             }
         };
         this.window = new PlayerWindow(
-                null,
+                TocarMusica,
                 RemoverMusica,
                 AdicionarMusica,
-                null,
-                null,
+                PausarTocarMusica,
+                PararMusica,
                 null,
                 null,
                 null,
@@ -118,5 +125,36 @@ public class Player {
         this.queueArray = listaDeFilas;
         this.window.updateQueueList(listaDeFilas);
     }
+
+    // variaveis para controlar o scroller
+    int posicaoScroller = 0;
+    ThreadDoScroller ThreadDoScroller;
+    // condicao se estar ou não tocando alguma coisa
+    Boolean condicaoMusica = false;
+
+    private void pararMusica() {
+        this.window.resetMiniPlayer();
+        condicaoMusica = false;
+    }
+
+    void tocarMusica() {
+        int id = this.window.getSelectedSongID();
+        for (String[] musica: queueArray) {
+            if (Objects.equals(musica[6], Integer.toString(id))) {this.window.updatePlayingSongInfo(musica[0], musica[1], musica[2]);}
+        }
+        this.window.enableScrubberArea();
+    }
+
+    void pausarTocarMusica() {
+        if (!condicaoMusica) {
+            ThreadDoScroller = new ThreadDoScroller(window, window.getScrubberValue(), 100);
+            ThreadDoScroller.start();
+            condicaoMusica = true;
+        } else {
+            ThreadDoScroller.interrupt();
+            condicaoMusica = false;
+        }
+    }
+    
 }
 
