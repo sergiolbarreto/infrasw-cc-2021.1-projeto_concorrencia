@@ -7,6 +7,7 @@ import javax.swing.text.MaskFormatter;
 import java.awt.*;
 import java.awt.event.*;
 import java.text.ParseException;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class AddSongWindow extends Thread {
 
@@ -267,9 +268,11 @@ public class AddSongWindow extends Thread {
      * [6] Song ID
      */
     public String[] getSong() {
-        String[] newSong = new String[song.length];
-        System.arraycopy(song, 0, newSong, 0, song.length);
-        return newSong;
+
+            String[] newSong = new String[song.length];
+            System.arraycopy(song, 0, newSong, 0, song.length);
+            return newSong;
+
     }
 
     private @Nullable

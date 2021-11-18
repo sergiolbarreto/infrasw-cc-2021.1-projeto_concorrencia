@@ -8,9 +8,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.Objects;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class MiniPlayerPanel extends JPanel {
 
@@ -41,6 +38,7 @@ public class MiniPlayerPanel extends JPanel {
             ActionListener buttonListenerRepeat,
             MouseListener scrubberListenerClick,
             MouseMotionListener scrubberListenerMotion) {
+
         JPanel miniPlayerInfoAndScrubber = new JPanel();
         JPanel miniPlayerScrubberPanel = new JPanel();
         JPanel miniPlayerButtons = new JPanel();
@@ -144,16 +142,7 @@ public class MiniPlayerPanel extends JPanel {
 
     // TODO Sincronizar
     public void updatePlayPauseButton(boolean isPlaying) {
-        final ReentrantLock lockPlayPause = new ReentrantLock();
-        lockPlayPause.lock();
-        try
-        {
-            miniPlayerPlayPauseButton.setIcon(isPlaying ? iconPause : iconPlay);
-        }
-        finally {
-            lockPlayPause.unlock();
-        }
-
+        miniPlayerPlayPauseButton.setIcon(isPlaying ? iconPause : iconPlay);
     }
 
 
@@ -186,21 +175,13 @@ public class MiniPlayerPanel extends JPanel {
 
     // TODO Sincronizar
     public void resetMiniPlayer() {
-        final ReentrantLock lockResetMiniPlayer = new ReentrantLock();
-        lockResetMiniPlayer.lock();
-        try
-        {
-            miniPlayerCurrentTime.setText("- - : - -");
-            miniPlayerTotalTime.setText("- - : - -");
-            miniPlayerSongInfo.setText("");
-            miniPlayerScrubber.setMaximum(0);
-            miniPlayerScrubber.setEnabled(false);
-            miniPlayerPlayPauseButton.setIcon(iconPlay);
-            disableScrubberArea();
-        }
-        finally {
-            lockResetMiniPlayer.unlock();
-        }
+        miniPlayerCurrentTime.setText("- - : - -");
+        miniPlayerTotalTime.setText("- - : - -");
+        miniPlayerSongInfo.setText("");
+        miniPlayerScrubber.setMaximum(0);
+        miniPlayerScrubber.setEnabled(false);
+        miniPlayerPlayPauseButton.setIcon(iconPlay);
+        disableScrubberArea();
     }
 
     public int getScrubberValue() {

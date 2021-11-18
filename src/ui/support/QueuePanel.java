@@ -7,6 +7,7 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class QueuePanel extends JPanel {
 
@@ -20,10 +21,11 @@ public class QueuePanel extends JPanel {
 
     // TODO Sincronizar
     public QueuePanel(
-            ActionListener buttonListenerPlayNow,
-            ActionListener buttonListenerRemove,
-            ActionListener buttonListenerAddSong,
-            String[][] queueArray) {
+        ActionListener buttonListenerPlayNow,
+        ActionListener buttonListenerRemove,
+        ActionListener buttonListenerAddSong,
+        String[][] queueArray) {
+
         JPanel queuePanelButtons = new JPanel();
         JScrollPane queueListPane = new JScrollPane();
 
@@ -84,6 +86,7 @@ public class QueuePanel extends JPanel {
 
     // TODO Sincronizar
     public void updateQueueList(String[][] queueArray) {
+
         queueList.setShowHorizontalLines(true);
         queueList.setDragEnabled(false);
         queueList.setColumnSelectionAllowed(false);

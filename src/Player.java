@@ -11,35 +11,44 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import ui.PlayerWindow;
-
 public class Player {
+
     String[][] queueArray = {};
     PlayerWindow window;
     AddSongWindow addSongWindow;
     String musicaTocandoAtualmenteID;
+    Boolean tocandoMusica = false;
+    private final Lock lock = new ReentrantLock();
+    Condition condition = lock.newCondition();
+
     public Player() {
 
         // ActionListener que vai ativar funçao de adicionar uma musica
-        ActionListener AdicionarMusica = e -> adicionarMusica();
+        ActionListener buttonListenerAddSong = e -> adicionarMusica();
         // ActionListener que vai ativar funçao de remover uma musica
         ActionListener RemoverMusica = e -> removerMusica();
         // ActionListener que vai ativar funçao de tocar uma musica
         ActionListener TocarMusica = e -> tocarMusica();
         // ActionListener que vai ativar funçao de começar e parar uma musica
-        ActionListener PausarTocarMusica = e -> pausarTocarMusica();
+        ActionListener buttonListenerPause = e -> {
+            if (!tocandoMusica){
+                playMusica();
+                ThreadDoScroller.tocandoMusica = true;
+                ThreadDoScroller.start();
+                condition.signal();
+            }
+            else {
+                pausarMusica();
+            }
+
+        };
         // ActionListener que vai parar uma musica
         ActionListener PararMusica = e -> pararMusica();
 
-        ActionListener buttonListenerPause = e -> {
-
-        };
         ActionListener buttonListenerAddSongOk = e -> {
 
         };
-        ActionListener buttonListenerAddSong = e -> {
 
-        };
         MouseListener scrubberListenerClick = new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -77,8 +86,8 @@ public class Player {
         this.window = new PlayerWindow(
                 TocarMusica,
                 RemoverMusica,
-                AdicionarMusica,
-                PausarTocarMusica,
+                buttonListenerAddSong,
+                buttonListenerPause,
                 PararMusica,
                 null,
                 null,
@@ -106,12 +115,12 @@ public class Player {
     int musicaAtualId = 0;
 
     void adicionarMusica() {
-        ActionListener addSongOkAction = e -> {
+        ActionListener buttonListenerAddSongOk = e -> {
             String[] musica = addSongWindow.getSong();
             adicionarMusicaNaLista(musica);
         };
         WindowListener listener = this.window.getAddSongWindowListener();
-        AddSongWindow newWindow = new AddSongWindow(Integer.toString(this.musicaAtualId), addSongOkAction, listener);
+        AddSongWindow newWindow = new AddSongWindow(Integer.toString(this.musicaAtualId), buttonListenerAddSongOk, listener);
         this.addSongWindow = newWindow;
         newWindow.start();
         this.musicaAtualId++;
@@ -132,18 +141,15 @@ public class Player {
             ThreadDoScroller.interrupt();
             this.window.resetMiniPlayer();
         }
-
     }
 
-    // variaveis para controlar o scroller
+    // variaveis para controlar o
     int posicaoScroller = 0;
     ThreadDoScroller ThreadDoScroller;
-    // condicao se está ou não tocando alguma coisa
-    Boolean condicaoMusica = false;
 
     private void pararMusica() {
         this.window.resetMiniPlayer();
-        condicaoMusica = false;
+        tocandoMusica = false;
     }
 
     void tocarMusica() {
@@ -160,19 +166,22 @@ public class Player {
         }
         this.window.enableScrubberArea();
         int tamMus = Integer.parseInt(queueArray[id][5]);
-        ThreadDoScroller = new ThreadDoScroller(window, window.getScrubberValue(), tamMus);
+        ThreadDoScroller = new ThreadDoScroller(window, window.getScrubberValue(), tamMus, condition, tocandoMusica);
     }
 
-    void pausarTocarMusica()  {
-        if (!condicaoMusica) {
-            ThreadDoScroller.start();
+    void pausarMusica() {
+        lock.lock();
+        try {
+            window.updatePlayPauseButton(false);
+            tocandoMusica = false;
+        }
+        finally {
+            lock.unlock();
+        }
+
+    }
+    void playMusica() {
             window.updatePlayPauseButton(true);
-            condicaoMusica = true;
-        }
-        else {
-                window.updatePlayPauseButton(false);
-                condicaoMusica = false;
+            tocandoMusica = true;
         }
     }
-}
-
