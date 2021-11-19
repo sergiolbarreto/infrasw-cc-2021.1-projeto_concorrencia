@@ -131,6 +131,8 @@ public class Player {
     ThreadDoScroller ThreadDoScroller;
     // condicao se estar ou não tocando alguma coisa
     Boolean condicaoMusica = false;
+    int duracaoDaMusica = 0;
+    int segundoDaMusica = 0;
 
     private void pararMusica() {
         this.window.resetMiniPlayer();
@@ -141,19 +143,29 @@ public class Player {
         int id = this.window.getSelectedSongID();
         for (String[] musica: queueArray) {
             if (Objects.equals(musica[6], Integer.toString(id))) {this.window.updatePlayingSongInfo(musica[0], musica[1], musica[2]);}
+            this.duracaoDaMusica = Integer.parseInt(musica[5]);
         }
         this.window.enableScrubberArea();
     }
 
-    void pausarTocarMusica() {
-        if (!condicaoMusica) {
-            ThreadDoScroller = new ThreadDoScroller(window, window.getScrubberValue(), 100);
-            ThreadDoScroller.start();
-            condicaoMusica = true;
+    private void pausarTocarMusica() {
+        if (duracaoDaMusica != window.getScrubberValue()) {
+            segundoDaMusica = window.getScrubberValue();
         } else {
-            ThreadDoScroller.interrupt();
             condicaoMusica = false;
         }
+
+        if (!condicaoMusica) {
+            ThreadDoScroller = new ThreadDoScroller(
+                    window,
+                    segundoDaMusica,
+                    duracaoDaMusica
+            );
+            ThreadDoScroller.start();
+        } else {
+            ThreadDoScroller.interrupt();
+        }
+        condicaoMusica = !condicaoMusica;
+        window.updatePlayPauseButton(condicaoMusica);
     }
-    
 }

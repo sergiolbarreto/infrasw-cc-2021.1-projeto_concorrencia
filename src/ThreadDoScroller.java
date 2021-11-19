@@ -13,14 +13,19 @@ public class ThreadDoScroller extends Thread{
     }
     @Override
     public void run() {
-            for (int i = partida; i < tamanho; i++) {
-                window.updateMiniplayer(true, true, false, i, tamanho, 0, 0);
+        boolean pausa = false;
+        for (int i = partida; i < tamanho; i++) {
+            window.updateMiniplayer(true, true, false, i, tamanho, 0, 0);
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    window.updateMiniplayer(true, false, false, i, tamanho, 0, 0);
-                    return;
+                    i = tamanho;
+                    pausa = true;
                 }
+            }
+            if (!pausa) {
+                window.updateMiniplayer(true, false, false, tamanho, tamanho, 0, 0
+                );
             }
         }
     }
