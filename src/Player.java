@@ -14,6 +14,7 @@ public class Player {
     String[][] queueArray = {};
     PlayerWindow window;
     AddSongWindow addSongWindow;
+    String musicaTocandoAtualmenteID;
 
     public Player() {
 
@@ -103,6 +104,7 @@ public class Player {
     int musicaAtualId = 0;
 
     void adicionarMusica() {
+        // janela de adicionar musica
         ActionListener addSongOkAction = e -> {
             String[] musica = addSongWindow.getSong();
             adicionarMusicaNaLista(musica);
@@ -118,12 +120,17 @@ public class Player {
     void removerMusica() {
         int id = this.window.getSelectedSongID();
         String[][] listaDeFilas = new String[queueArray.length - 1][7];
+        int j = 0;
         for (int i = 0; i < queueArray.length; i++) {
             String[] musica = queueArray[i];
-            if (!Objects.equals(musica[6], Integer.toString(id))) {listaDeFilas[i] = musica;}
+            if (!Objects.equals(musica[6], Integer.toString(id))) {listaDeFilas[j] = musica; j++;}
         }
         this.queueArray = listaDeFilas;
-        this.window.updateQueueList(listaDeFilas);
+        this.window.updateQueueList(queueArray);
+        if (Objects.equals(musicaTocandoAtualmenteID, Integer.toString(id))) {
+            ThreadDoScroller.interrupt();
+            this.window.resetMiniPlayer();
+        }
     }
 
     // variaveis para controlar o scroller
@@ -140,12 +147,18 @@ public class Player {
     }
 
     void tocarMusica() {
+        if (ThreadDoScroller != null){
+            ThreadDoScroller.interrupt();
+        }
         int id = this.window.getSelectedSongID();
         for (String[] musica: queueArray) {
             if (Objects.equals(musica[6], Integer.toString(id))) {this.window.updatePlayingSongInfo(musica[0], musica[1], musica[2]);}
             this.duracaoDaMusica = Integer.parseInt(musica[5]);
+            window.updateMiniplayer(true, false, false, 0, duracaoDaMusica, 0 , 0);
         }
         this.window.enableScrubberArea();
+        musicaTocandoAtualmenteID = Integer.toString(id);
+
     }
 
     private void pausarTocarMusica() {
@@ -165,6 +178,7 @@ public class Player {
         } else {
             ThreadDoScroller.interrupt();
         }
+
         condicaoMusica = !condicaoMusica;
         window.updatePlayPauseButton(condicaoMusica);
     }
