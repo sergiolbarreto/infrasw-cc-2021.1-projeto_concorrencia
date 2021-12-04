@@ -8,6 +8,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.Objects;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class MiniPlayerPanel extends JPanel {
 
@@ -155,21 +157,29 @@ public class MiniPlayerPanel extends JPanel {
             int totalTime,
             int songIndex,
             int queueSize) {
-        if (isActive) {
-            updatePlayPauseButton(isPlaying);
-            miniPlayerCurrentTime.setText(SecondsToString.currentTimeToString(currentTime, totalTime));
-            miniPlayerTotalTime.setText(SecondsToString.lengthToString(totalTime));
-            miniPlayerScrubber.setMaximum(totalTime);
-            miniPlayerScrubber.setValue(currentTime);
-            if (!isRepeat) {
-                miniPlayerPreviousButton.setEnabled(songIndex > 0);
-                miniPlayerNextButton.setEnabled(songIndex < queueSize - 1);
-            } else {
-                miniPlayerPreviousButton.setEnabled(true);
-                miniPlayerNextButton.setEnabled(true);
+        final ReentrantLock lockUpdateMiniPlayer = new ReentrantLock();
+        lockUpdateMiniPlayer.lock(); // lock para evitar que o tempo seja mudado por ações diferentes ocorrendo simultaneamente
+        try {
+            if (isActive) {
+                updatePlayPauseButton(isPlaying);
+                miniPlayerCurrentTime.setText(SecondsToString.currentTimeToString(currentTime, totalTime));
+                miniPlayerTotalTime.setText(SecondsToString.lengthToString(totalTime));
+                miniPlayerScrubber.setMaximum(totalTime);
+                miniPlayerScrubber.setValue(currentTime);
+                if (!isRepeat) {
+                    miniPlayerPreviousButton.setEnabled(songIndex > 0);
+                    miniPlayerNextButton.setEnabled(songIndex < queueSize - 1);
+                } else {
+                    miniPlayerPreviousButton.setEnabled(true);
+                    miniPlayerNextButton.setEnabled(true);
+                }
             }
-        } else {
-            resetMiniPlayer();
+            else {
+                resetMiniPlayer();
+            }
+        }
+        finally {
+            lockUpdateMiniPlayer.unlock();
         }
     }
 

@@ -204,6 +204,7 @@ public class PlayerWindow extends Thread {
             int totalTime,
             int songIndex,
             int queueSize) {
+
         miniPlayerPanel.updateMiniplayer(
                 isActive,
                 isPlaying,

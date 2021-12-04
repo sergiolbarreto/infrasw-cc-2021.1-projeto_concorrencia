@@ -5,17 +5,21 @@ public class ThreadDoScroller extends Thread{
     int partida;
     int tamanho;
     PlayerWindow window;
+    int songIndex;
+    int queueSize;
 
-    public ThreadDoScroller(PlayerWindow window, int partida, int tamanho) {
+    public ThreadDoScroller(PlayerWindow window, int partida, int tamanho, int songIndex, int queueSize) {
         this.partida = partida;
         this.tamanho = tamanho;
         this.window = window;
+        this.songIndex = songIndex;
+        this.queueSize = queueSize;
     }
     @Override
     public void run() {
         boolean pausa = false;
         for (int i = partida; i < tamanho; i++) {
-            window.updateMiniplayer(true, true, false, i, tamanho, 0, 0);
+            window.updateMiniplayer(true, true, false, i, tamanho, songIndex, queueSize);
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
@@ -24,7 +28,7 @@ public class ThreadDoScroller extends Thread{
                 }
             }
             if (!pausa) {
-                window.updateMiniplayer(true, false, false, tamanho, tamanho, 0, 0
+                window.updateMiniplayer(true, false, false, tamanho, tamanho, songIndex, queueSize
                 );
             }
         }
