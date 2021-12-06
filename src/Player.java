@@ -41,8 +41,20 @@ public class Player {
 
         MouseListener scrubberListenerClick = new MouseListener() {
             @Override
+
             public void mouseClicked(MouseEvent e) {
+                // ao invés do clicked foram implementados os mousePressed e mouseReleased, pois dessa forma não há
+                // conflito no caso de existir um clicked e outro released funcionando ao mesmo tempo e executando
+                // funções similares em partes
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
                 ThreadDoScroller.interrupt();
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
                 ThreadDoScroller = new ThreadDoScroller(
                         window,
                         window.getScrubberValue(),
@@ -51,16 +63,6 @@ public class Player {
                         queueSize
                 );
                 ThreadDoScroller.start();
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-
             }
 
             @Override
@@ -75,15 +77,9 @@ public class Player {
 
             @Override
             public void mouseDragged(MouseEvent e) {
-                ThreadDoScroller.interrupt();
-                ThreadDoScroller = new ThreadDoScroller(
-                        window,
-                        window.getScrubberValue(),
-                        duracaoDaMusica,
-                        posicaoMusicaQueueArray,
-                        queueSize
-                );
-                ThreadDoScroller.start();
+                // isso ocorrerá enquanto o usuário estiver arrastando o mouse no slider, será utilizado em conjunto
+                // com o mousePressed e mouseReleased
+                window.updateMiniplayer(true,true,false,window.getScrubberValue(),duracaoDaMusica, posicaoMusicaQueueArray, queueSize);
             }
 
             @Override
@@ -170,13 +166,10 @@ public class Player {
             String[] musica = queueArray[i];
             if (!Objects.equals(musica[6], Integer.toString(id))) {listaDeFilas[j] = musica; j++;}
             else {
-                String musicaASerRemovidaID = musica[6];
-                if (Objects.equals(musicaTocandoAtualmenteID, Integer.toString(id))) {
-                    if (ThreadDoScroller != null) {
-                        ThreadDoScroller.interrupt();
-                    }
-                    this.window.resetMiniPlayer();
+                if (ThreadDoScroller != null) {
+                    ThreadDoScroller.interrupt();
                 }
+                this.window.resetMiniPlayer();
             }
         }
         this.queueArray = listaDeFilas;
