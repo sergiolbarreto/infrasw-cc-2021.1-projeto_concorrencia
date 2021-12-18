@@ -8,6 +8,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.Objects;
 
+
 public class Player {
     String[][] queueArray = {};
     PlayerWindow window;
@@ -22,6 +23,11 @@ public class Player {
                                 funcionará igual a menos que o id da música que irá tocar não será o de alguma selecionada,
                                 e sim o da música anterior/próxima à atual*/
     int idNextPreviousMusic;
+    boolean reprAleatoria = false;   // booleano que indica se a reprodução aleatória está ativada ou não
+    String[][] listaOriginal; // matriz que vai guardar o QueueArray original para trocar entre reprodução aleatoria
+                              // e sequencia
+    boolean isRepeat = false;
+
     public Player() {
 
         // ActionListener que vai ativar funçao de adicionar uma musica
@@ -38,6 +44,10 @@ public class Player {
         ActionListener ProximaMusica = e -> proximaMusica();
         // ActionListener para dar um previous na musica
         ActionListener AnteriorMusica = e -> anteriorMusica();
+        // ActionListener para ativar reproducao aleatoria
+        ActionListener Aleatorizar = e -> aleatorizar();
+        // ActionListener para ativar reproducao repetitiva
+        ActionListener Repetir = e -> repetir();
 
         MouseListener scrubberListenerClick = new MouseListener() {
             @Override
@@ -60,7 +70,8 @@ public class Player {
                         window.getScrubberValue(),
                         duracaoDaMusica,
                         posicaoMusicaQueueArray,
-                        queueSize
+                        queueSize,
+                        queueArray
                 );
                 ThreadDoScroller.start();
             }
@@ -95,21 +106,45 @@ public class Player {
                 ProximaMusica,
                 AnteriorMusica,
                 null,
-                null,
+                Repetir,
                 scrubberListenerClick,
                 scrubberListenerMotion,
                 "Player",
                 queueArray
         );
+
+    }
+    void aleatorizar() {
+        // metodo para ativar reproducao aleatoria
+        listaOriginal = queueArray;
+
+    }
+
+    void repetir() {
+        // metodo para ativar reproducao repetitiva
+        // ver método proximaMusica() abaixo
+        // ATENÇAO!!! o código está implementado de forma incompleta, a função repetir só funciona efetivamente se o
+        // usuário ativar o modo repetir e após isso pressionar o botão de next, e a próxima música seria então
+        // a mesma que ele está escutando (o player está repetindo)
+        isRepeat = !isRepeat;
     }
 
     void proximaMusica() {
         // coloca a próxima música para ficar setada para tocar
-        chamouNextPrevious = true;
-        idNextPreviousMusic = posicaoMusicaQueueArray+1;
-        tocarMusica();
-        chamouNextPrevious = false; // para não dar problema se o usuário quiser tocar outra música através do
-                                    // tocarMusica normalmente
+        if (!isRepeat) { // se nao estiver setado para repetir, funcionará normalmente
+            chamouNextPrevious = true;
+            idNextPreviousMusic = posicaoMusicaQueueArray + 1;
+            tocarMusica();
+            chamouNextPrevious = false; // para não dar problema se o usuário quiser tocar outra música através do
+                                        // tocarMusica normalmente
+        }
+        else if (isRepeat) { // se estiver setado para repetir, funcionará igual, a menos que o id não será incrementado
+            chamouNextPrevious = true;  // dessa forma, permanecerá na mesma música
+            idNextPreviousMusic = posicaoMusicaQueueArray;
+            tocarMusica();
+            chamouNextPrevious = false; // para não dar problema se o usuário quiser tocar outra música através do
+                                        // tocarMusica normalmente
+        }
     }
 
     void anteriorMusica(){
@@ -136,6 +171,7 @@ public class Player {
         if (ThreadDoScroller != null) { // para atualizar o miniplayer, mais especificamente se o botão de next
                                         // estava desativado e agora deve ficar ativado
             ThreadDoScroller.queueSize = queueSize;
+            ThreadDoScroller.QueueArray = queueArray;
         }
         else {
             window.updateMiniplayer(true, false, false, window.getScrubberValue(), duracaoDaMusica, posicaoMusicaQueueArray, queueSize);
@@ -162,19 +198,23 @@ public class Player {
         int id = this.window.getSelectedSongID();
         String[][] listaDeFilas = new String[queueArray.length - 1][7];
         int j = 0;
+        if (Objects.equals(musicaTocandoAtualmenteID, Integer.toString(id))){
+            if (ThreadDoScroller != null) {
+                ThreadDoScroller.interrupt();
+            }
+            this.window.resetMiniPlayer();
+        }
         for (int i = 0; i < queueArray.length; i++) {
             String[] musica = queueArray[i];
             if (!Objects.equals(musica[6], Integer.toString(id))) {listaDeFilas[j] = musica; j++;}
-            else {
-                if (ThreadDoScroller != null) {
-                    ThreadDoScroller.interrupt();
-                }
-                this.window.resetMiniPlayer();
-            }
         }
         this.queueArray = listaDeFilas;
         this.window.updateQueueList(queueArray);
         queueSize--;
+        if (ThreadDoScroller != null) {
+            ThreadDoScroller.queueSize = queueSize;
+            ThreadDoScroller.QueueArray = queueArray;
+        }
     }
 
     // variaveis para controlar o scroller
@@ -241,7 +281,8 @@ public class Player {
                     segundoDaMusica,
                     duracaoDaMusica,
                     posicaoMusicaQueueArray,
-                    queueSize
+                    queueSize,
+                    queueArray
             );
             ThreadDoScroller.start();
         } else {
